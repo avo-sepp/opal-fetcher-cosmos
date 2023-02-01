@@ -3,8 +3,6 @@ Simple fetch provider for CosmosDB.
 """
 from typing import Optional, List
 
-# import azure-cosmos
-# import azure-identity
 from azure.cosmos.aio import CosmosClient
 from azure.identity.aio import DefaultAzureCredential
 from pydantic import BaseModel, Field
@@ -51,7 +49,7 @@ https://www.openpolicyagent.org/docs/latest/rest-api/    - (optional): add any f
 
 class CosmosDBFetchEvent(FetchEvent):
     """
-    A FetchEvent shape for the Postgres Fetch Provider.
+    A FetchEvent shape for the Cosmos Fetch Provider.
 
     When writing a custom provider, you must create a custom FetchEvent subclass, just like this class.
     In your own class, you must set the value of the `fetcher` key to be your custom provider class name.
@@ -98,35 +96,27 @@ class CosmosDBFetchProvider(BaseFetchProvider):
         if event.config is None:
             event.config = CosmosDBFetcherConfig()
         super().__init__(event)
-        self._connection: Optional[asyncpg.Connection] = None
-        self._transaction: Optional[Transaction] = None
+        self._connection: Optional[azure.DefaultAzureCrednetial] = None
+        self._client: Optional[azure.CosmosClient] = None
 
     def parse_event(self, event: FetchEvent) -> CosmosDBFetchEvent:
         return CosmosDBFetchEvent(**event.dict(exclude={"config"}), config=event.config)
 
     async def __aenter__(self):
         self._event: CosmosDBFetchEvent # type casting
-
-        default_credential = DefaultAzureCredential()
-
         dsn: str = self._event.url
         connection_params: dict = {} if self._event.config.connection_params is None else self._event.config.connection_params.dict(exclude_none=True)
 
-        # connect to the cosmos database
-        self._connection: asyncpg.Connection = await asyncpg.connect(dsn, **connection_params)
-        # start a readonly transaction (we don't want OPAL client writing data due to security!)
-        self._transaction: Transaction = self._connection.transaction(readonly=True)
-        await self._transaction.__aenter__()
-
+        self._credential = DefaultAzureCredential(**connection_params)
+        self._client = CosmosClient(self._event.url, self._credential)
         return self
 
     async def __aexit__(self, exc_type=None, exc_val=None, tb=None):
-        # End the transaction
-        if self._transaction is not None:
-            await self._transaction.__aexit__(exc_type, exc_val, tb)
-        # Close the connection
-        if self._connection is not None:
-            await self._connection.close()
+        # Close async handles for CosmosClient and credential
+        if self._client is not None:
+            await self._client.close()
+        if self._credential is not None:
+            await self._credential.close()
 
     async def _fetch_(self):
         self._event: CosmosDBFetchEvent # type casting

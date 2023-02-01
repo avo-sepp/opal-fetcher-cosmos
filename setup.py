@@ -25,6 +25,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         'opal-common>=0.1.11',
+        'azure-identity',
         'azure-cosmos',
         'pydantic',
         'tenacity',

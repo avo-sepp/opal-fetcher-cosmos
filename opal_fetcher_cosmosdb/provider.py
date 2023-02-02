@@ -133,12 +133,16 @@ class CosmosDBFetchProvider(BaseFetchProvider):
         results = container.query_items(
                 query=self._event.config.query)
 
-        item_list = [item async for item in results]
-        return item_list
+        return results
 
     async def _process_(self, records: List[]): #TODO what is the datatype for list?
         self._event: CosmosDBFetchEvent # type casting
         
+        item_list = [item async for item in results]
+        return item_list
+
+
+
         # when fetch_one is true, we want to return a dict (and not a list)
         if self._event.config.fetch_one:
             if records and len(records) > 0:

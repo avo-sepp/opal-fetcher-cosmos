@@ -122,18 +122,21 @@ class CosmosDBFetchProvider(BaseFetchProvider):
         self._event: CosmosDBFetchEvent # type casting
         
         if self._event.config is None:
-            logger.warning("incomplete fetcher config: postgres data entries require a query to specify what data to fetch!")
+            logger.warning("incomplete fetcher config: cosmosdb data reads require a query to specify what data to fetch!")
             return
         
         logger.debug(f"{self.__class__.__name__} fetching from {self._url}")
 
-        if self._event.config.fetch_one:
-            row = await self._connection.fetchrow(self._event.config.query)
-            return [row]
-        else:
-            return await self._connection.fetch(self._event.config.query)
+        database = self._client.get_database_client(self._event.config.database)
+        container = database.get_container_client(self._event.config.container)
+        
+        results = container.query_items(
+                query=self._event.config.query)
 
-    async def _process_(self, records: List[asyncpg.Record]):
+        item_list = [item async for item in results]
+        return item_list
+
+    async def _process_(self, records: List[]): #TODO what is the datatype for list?
         self._event: CosmosDBFetchEvent # type casting
         
         # when fetch_one is true, we want to return a dict (and not a list)

@@ -39,4 +39,3 @@ dynamic = ["version"]
 "Bug Tracker" = "https://github.com/avo-sepp/opal-fetcher-cosmos/issues"
 
 [tool.setuptools_scm]
-write_to = "opal_fetcher_cosmos/_version.py"

@@ -59,7 +59,6 @@ class CosmosFetchProvider(BaseFetchProvider):
     }
 
     def __init__(self, event: CosmosFetchEvent) -> None:
-        logger.warning("init")
         if event.config is None:
             event.config = CosmosFetcherConfig()
         super().__init__(event)

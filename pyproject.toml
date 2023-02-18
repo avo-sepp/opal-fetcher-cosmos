@@ -1,3 +1,42 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=7.1"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "opal-fetcher-cosmos"
+authors = [
+    { name="Avo Sepp", email="avo@sepp.is"},
+]
+description="An OPAL fetch provider to bring authorization state from CosmosDB."
+readme = "README.md"
+keywords = ["Open Policy Agent", "OPA", "OPAL", "Open Policy Administration Layer", "Permit.io"]
+requires-python = ">=3.7"
+license = {text = "Apache-2.0"}
+#license-expression = "Apache-2.0"
+#license-files = ['LICENSE']
+classifiers = [
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "setuptools-scm",
+    "opal-common>=0.1.11",
+    "azure-cosmos",
+    "azure-identity",
+    "wait-for-it",
+    "pydantic",
+    "tenacity",
+    "click",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/avo-sepp/opal-fetcher-cosmos"
+"Source" = "https://github.com/avo-sepp/opal-fetcher-cosmos"
+"Bug Tracker" = "https://github.com/avo-sepp/opal-fetcher-cosmos/issues"
+
+[tool.setuptools_scm]
+write_to = "opal_fetcher_cosmos/_version.py"

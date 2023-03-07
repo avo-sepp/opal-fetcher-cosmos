@@ -2,13 +2,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 from tenacity import wait, stop, retry_unless_exception_type
+import jq
 
 from opal_common.fetcher.fetch_provider import BaseFetchProvider
 from opal_common.fetcher.events import FetcherConfig, FetchEvent
 from opal_common.logger import logger
 from azure.cosmos.aio import CosmosClient, DatabaseProxy, ContainerProxy
 from azure.cosmos.exceptions import CosmosHttpResponseError
-
 
 class CosmosConnectionParams(BaseModel):
     database_name: Optional[str] = Field(None, description="the database name")
@@ -29,6 +29,10 @@ class CosmosFetcherConfig(FetcherConfig):
     )
     query: str = Field(
         ..., description="the query to run against cosmos in order to fetch the data"
+    )
+    jqProgram: str = Field(
+            None,
+            description="Post-process a query with jq by providing a jq compliant transformation"
     )
 
 
@@ -106,4 +110,11 @@ class CosmosFetchProvider(BaseFetchProvider):
     async def _process_(self, results: dict[str, any]):
         self._event: CosmosFetchEvent  # type casting
         items = [item async for item in results]
+        
+        # Optionally transform JSON with jq
+        if self._event.config.jqProgram is not None:
+            logger.info(f"Transforming JSON with jq program: {self._event.config.jqProgram}")
+            jqParsedItems = jq.compile(self._event.config.jqProgram).input(items).all()
+            return jqParsedItems
+
         return items

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "opal-fetcher-cosmos"
 authors = [
-    { name="Avo Sepp", email="avo@sepp.is"},
+    { name="Avo Sepp" },
 ]
 description="An OPAL fetch provider to bring authorization state from CosmosDB."
 readme = "README.md"
@@ -26,6 +26,7 @@ dependencies = [
     "opal-common>=0.1.11",
     "azure-cosmos",
     "azure-identity",
+    "jq",
     "wait-for-it",
     "pydantic",
     "tenacity",

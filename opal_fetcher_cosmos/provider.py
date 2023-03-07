@@ -10,6 +10,7 @@ from opal_common.logger import logger
 from azure.cosmos.aio import CosmosClient, DatabaseProxy, ContainerProxy
 from azure.cosmos.exceptions import CosmosHttpResponseError
 
+
 class CosmosConnectionParams(BaseModel):
     database_name: Optional[str] = Field(None, description="the database name")
     container_name: Optional[str] = Field(None, description="the container name")
@@ -31,8 +32,8 @@ class CosmosFetcherConfig(FetcherConfig):
         ..., description="the query to run against cosmos in order to fetch the data"
     )
     jqProgram: str = Field(
-            None,
-            description="Post-process a query with jq by providing a jq compliant transformation"
+        None,
+        description="Post-process a query with jq by providing a jq compliant transformation",
     )
 
 
@@ -110,10 +111,12 @@ class CosmosFetchProvider(BaseFetchProvider):
     async def _process_(self, results: dict[str, any]):
         self._event: CosmosFetchEvent  # type casting
         items = [item async for item in results]
-        
+
         # Optionally transform JSON with jq
         if self._event.config.jqProgram is not None:
-            logger.info(f"Transforming JSON with jq program: {self._event.config.jqProgram}")
+            logger.info(
+                f"Transforming JSON with jq program: {self._event.config.jqProgram}"
+            )
             jqParsedItems = jq.compile(self._event.config.jqProgram).input(items).all()
             return jqParsedItems
 

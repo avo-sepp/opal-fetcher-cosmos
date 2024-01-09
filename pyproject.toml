@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "setuptools-scm",
-    "opal-common>=0.1.11",
+    "opal-common>=0.7.4",
     "azure-cosmos",
     "azure-identity",
     "jq",
